@@ -15,6 +15,8 @@ from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
 from django.http import HttpResponseRedirect
 from decouple import config
+from rest_framework.authtoken.models import Token
+from profile_app.models import Profile
 
 
 class RegistrationView(APIView):
@@ -25,8 +27,16 @@ class RegistrationView(APIView):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             saved_account = serializer.save()
-            send_confirmation_email(saved_account)
-            return Response({"message": "Bitte überprüfe deine E-Mails, um deinen Account zu aktivieren."}, status=status.HTTP_201_CREATED)
+            token, created = Token.objects.get_or_create(user=saved_account)
+            data = {
+                'token': token.key,
+                'username': saved_account.username,
+                'email': saved_account.email,
+                "user_id": saved_account.pk
+            }
+            generate_profile(request, saved_account) 
+            send_confirmation_email(saved_account, request.data['first_name'], request.data['last_name'])
+            return Response({"message": "Bitte überprüfe deine E-Mails, um deinen Account zu aktivieren.", "data": data},status=status.HTTP_201_CREATED)
         return Response({"error": "Bitte überprüfe deine Eingaben und versuche es erneut."}, status=status.HTTP_400_BAD_REQUEST)
     
 class ActivateAccountView(APIView):
@@ -51,14 +61,13 @@ def generate_username(request):
             username = username.replace(' ', '_')
     return username.lower()
 
-def send_confirmation_email(user):
+def send_confirmation_email(user, first_name, last_name):
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     activation_link = reverse('activate_account', kwargs={'uidb64': uid, 'token': token})
     full_link = f"{config('ROOT-DOMAIN')}{activation_link}"
-    print(full_link)
     subject = "Bestätige deinen Videoflix-Account"
-    html_message = generate_email(user.username, full_link)
+    html_message = generate_email(first_name, last_name, full_link)
     plain_message = f"Hallo {user.username}, bitte aktiviere deinen Account hier: {full_link}"
     send_mail(
         subject,
@@ -68,11 +77,20 @@ def send_confirmation_email(user):
         html_message=html_message
     )
 
-def generate_email(username, full_link):
+def generate_email(first_name, last_name, full_link):
     html_message = f"""
-    <p>Hallo {username},</p>
+    <p>Hallo {first_name} {last_name},</p>
     <p>Bitte aktiviere deinen Videoflix-Account, indem du auf den folgenden Link klickst:</p>
     <p><a href="{full_link}">Account aktivieren</a></p>
     <p>Vielen Dank, dass du dich für Videoflix entschieden hast!</p>
     """
     return html_message
+
+def generate_profile(request, saved_account):
+    Profile.objects.create(
+        user=saved_account.pk,
+        username=request.data['username'],
+        first_name=request.data['first_name'],
+        last_name=request.data['last_name'],
+        email=saved_account.email,
+    )
