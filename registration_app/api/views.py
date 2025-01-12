@@ -13,6 +13,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
+from django.http import HttpResponseRedirect
+from decouple import config
 
 
 class RegistrationView(APIView):
@@ -37,7 +39,7 @@ class ActivateAccountView(APIView):
             if default_token_generator.check_token(user, token):
                 user.is_active = True
                 user.save()
-                return Response({"message": "Dein Account wurde erfolgreich aktiviert."}, status=status.HTTP_200_OK)
+                return HttpResponseRedirect(config('DOMAIN_REDIRECT'))
             return Response({"error": "Ungültiger oder abgelaufener Token."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": "Aktivierungsfehler."}, status=status.HTTP_400_BAD_REQUEST)
@@ -53,10 +55,18 @@ def send_confirmation_email(user):
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     activation_link = reverse('activate_account', kwargs={'uidb64': uid, 'token': token})
-    full_link = f"http://localhost:8000{activation_link}"
+    full_link = f"{config('ROOT-DOMAIN')}{activation_link}"
+    print(full_link)
     subject = "Bestätige deinen Videoflix-Account"
-    message = generate_email(user.username, full_link)
-    send_mail(subject, message, 'mail@silvanstuber.ch', [user.email])
+    html_message = generate_email(user.username, full_link)
+    plain_message = f"Hallo {user.username}, bitte aktiviere deinen Account hier: {full_link}"
+    send_mail(
+        subject,
+        plain_message, 
+        config('EMAIL_USER'),
+        [user.email],
+        html_message=html_message
+    )
 
 def generate_email(username, full_link):
     html_message = f"""
