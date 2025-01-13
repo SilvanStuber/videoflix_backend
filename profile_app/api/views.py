@@ -1,4 +1,3 @@
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from profile_app.models import Profile
 from .serializers import ProfileSerializer
@@ -41,6 +40,7 @@ class ProfileViewSets(generics.ListCreateAPIView):
             serializer = ProfileSerializer(profile, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            switch_username(user, profile)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except NotFound:
             return Response({
@@ -54,46 +54,12 @@ class ProfileViewSets(generics.ListCreateAPIView):
             return Response({
                 "errors": e.detail
             }, status=status.HTTP_400_BAD_REQUEST)
+        
 
-class ProfileCustomerViewSets(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        customer_profiles = Profile.objects.filter(type="customer")
-        return_data_customer_profiles = []  
-        for profile in customer_profiles:
-            return_data_customer_profiles.append({
-                "user": {
-                    "pk": profile.user,
-                    "username": profile.username,
-                    "first_name": profile.first_name,
-                    "last_name": profile.last_name,
-                },
-                "file": profile.file.url if profile.file else None,
-                "uploaded_at": profile.uploaded_at,
-                "type": profile.type
-            })
-        return Response(return_data_customer_profiles, status=status.HTTP_200_OK)
-
-class ProfileBusinessViewSets(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        business_profiles = Profile.objects.filter(type="business")
-        return_data_business_profiles = []  
-        for profile in business_profiles:
-            return_data_business_profiles.append({
-                "user": {
-                    "pk": profile.user,
-                    "username": profile.username,
-                    "first_name": profile.first_name,
-                    "last_name": profile.last_name,
-                },
-                "file": profile.file.url if profile.file else None, 
-                "location": profile.location,
-                "tel": profile.tel,
-                "description": profile.description,
-                "working_hours": profile.working_hours,
-                "type": profile.type
-            })
-        return Response(return_data_business_profiles, status=status.HTTP_200_OK)
+def switch_username(user, profile):
+    new_username = profile.username
+    if ' ' in new_username:
+        new_username = new_username.replace(' ', '_')
+    username = new_username.lower()
+    user.username = username
+    user.save()

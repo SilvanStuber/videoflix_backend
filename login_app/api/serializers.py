@@ -31,5 +31,5 @@ class CustomLoginSerializer(serializers.Serializer):
 
 def generate_username_login(username):
     if ' ' in username:
-            username = username.replace(' ', '_')
+        username = username.replace(' ', '_')
     return username.lower()

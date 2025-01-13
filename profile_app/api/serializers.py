@@ -9,7 +9,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             'username', 
             'first_name',
             'last_name',
-            'file',
             'email',
             'created_at',
         ]
