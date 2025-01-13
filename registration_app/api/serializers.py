@@ -13,14 +13,17 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
 
     def save(self):
+        username = self.validated_data['username']
         pw = self.validated_data['password']
         repeated_pw = self.validated_data['repeated_password']
+        if '@' in username:
+            raise serializers.ValidationError({"detail": ["Kein @ im Username angeben."]})  
         if pw != repeated_pw:
-            raise serializers.ValidationError({"password": ["Das Passwort ist nicht gleich mit dem wiederholten Passwort"]})       
+            raise serializers.ValidationError({"detail": ["Das Passwort ist nicht gleich mit dem wiederholten Passwort."]})       
         if User.objects.filter(email=self.validated_data['email']).exists():
-            raise serializers.ValidationError({"email": ["Diese E-Mail-Adresse wird bereits verwendet."]})
+            raise serializers.ValidationError({"detail": ["Diese E-Mail-Adresse wird bereits verwendet."]})
         if User.objects.filter(username=self.validated_data['username']).exists():
-            raise serializers.ValidationError({"username": ["Dieser Benutzername ist bereits vergeben."],})
+            raise serializers.ValidationError({"detail": ["Dieser Benutzername ist bereits vergeben."],})
         else:
             account = User(
                 email=self.validated_data['email'],
