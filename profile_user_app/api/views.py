@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from profile_app.models import Profile
+from profile_user_app.models import Profile
 from .serializers import ProfileSerializer
 from rest_framework import generics
 from rest_framework import status

@@ -4,7 +4,7 @@ from .serializers import CustomLoginSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status
-from profile_app.models import Profile
+from profile_user_app.models import Profile
 
 class CostomLoginView(APIView):
     permission_classes = [AllowAny]

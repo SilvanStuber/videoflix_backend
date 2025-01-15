@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny
 from django.http import HttpResponseRedirect
 from decouple import config
 from rest_framework.authtoken.models import Token
-from profile_app.models import Profile
+from profile_user_app.models import Profile
 
 
 class RegistrationView(APIView):

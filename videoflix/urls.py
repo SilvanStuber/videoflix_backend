@@ -8,7 +8,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/authentication/', include('registration_app.api.urls')),
     path('api/login/', include('login_app.api.urls')),
-    path('api/profile/', include('profile_app.api.urls')),
+    path('api/profile/', include('profile_user_app.api.urls')),
+    path('api/viewer/', include('profile_viewer_app.api.urls')),
 
 ] + staticfiles_urlpatterns()
 

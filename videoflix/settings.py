@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'registration_app',
     'login_app',
     'profile_user_app',
+    'profile_viewer_app',
 ]
 
 MIDDLEWARE = [
