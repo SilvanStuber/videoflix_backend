@@ -69,4 +69,17 @@ class ProfileSinglViewSets(generics.ListCreateAPIView):
             return Response({"detail": "Keine Berechtigung, dieses Profil zu bearbeiten."}, status=status.HTTP_403_FORBIDDEN)
         except ValidationError as e:
             return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, *args, **kwargs):
+        pk = request.data.get('user')
+        user = User.objects.get(pk=pk)
+        viewer_id = self.kwargs.get('pk')
+        try:
+            viewer = ProfileViewer.objects.get(pk=viewer_id)
+            if not (request.user == user or request.user.is_staff):
+                raise PermissionDenied("Keine Berechtigung, dieses Profil zu löschen.")
+            viewer.delete()
+            return Response({"detail": "Profil erfolgreich gelöscht"}, status=status.HTTP_204_NO_CONTENT)
+        except ProfileViewer.DoesNotExist:
+            return Response({"detail": "Profil nicht gefunden"}, status=status.HTTP_404_NOT_FOUND)
         

@@ -8,6 +8,7 @@ class ProfileViewerSerializer(serializers.ModelSerializer):
             'user',       
             'viewer_id', 
             'viewername',
+            'picture_file',
             'created_at',
         ]   
 

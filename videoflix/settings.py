@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com' 
@@ -52,7 +53,8 @@ INSTALLED_APPS = [
     'registration_app',
     'login_app',
     'profile_user_app',
-    'profile_viewer_app',
+    'profile_viewer_app.apps.ProfileViewerAppConfig',
+    'content_app.apps.ContentAppConfig',
 ]
 
 MIDDLEWARE = [
@@ -89,6 +91,9 @@ TEMPLATES = [
         },
     },
 ]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 WSGI_APPLICATION = 'videoflix.wsgi.application'
 
