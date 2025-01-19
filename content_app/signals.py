@@ -11,14 +11,12 @@ def video_post_save(sender, instance, created, **kwargs):
         print('New video created')
         convert_480p(instance.video_file.path)
 
-
-
 @receiver(post_delete, sender=Video)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     
     if instance.video_file:
         if os.path.isfile(instance.video_file.path):
-            file_480p = instance.video_file.path + '_480p.mp4'
+            file_480p = f"{instance.video_file.path[:-4]}_480p.mp4"
             os.remove(instance.video_file.path)
             os.remove(file_480p)
 

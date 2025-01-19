@@ -18,9 +18,11 @@ class CostomLoginView(APIView):
             profile = Profile.objects.get(user=user.pk)
             data = {
                 'token': token.key,
+                'user': user.id,
                 'username': profile.username,
-                'email': profile.email,
-                "user_id": user.id,
+                'first_name': profile.first_name,
+                'last_name': profile.last_name,
+                'email': profile.email,   
             }
             return Response(data, status=status.HTTP_200_OK)
         else:

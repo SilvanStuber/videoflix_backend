@@ -20,15 +20,13 @@ class ProfileViewSets(generics.ListCreateAPIView):
         return [permission() for permission in permission_classes]
     
     def get(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
         try:
-            pk = self.kwargs.get('pk')
             profiles = Profile.objects.get(user=pk)
             serializer = ProfileSerializer(profiles)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except NotFound:
-            return Response({
-                "detail": "Profil nicht gefunden"
-            }, status=status.HTTP_404_NOT_FOUND)
+        except Profile.DoesNotExist:
+            return Response({"detail": "Profil nicht gefunden"}, status=status.HTTP_404_NOT_FOUND)
         
     def patch(self, request, *args, **kwargs):
         pk = self.kwargs.get('pk')
