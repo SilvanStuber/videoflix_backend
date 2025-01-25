@@ -33,3 +33,22 @@ class RegistrationSerializer(serializers.ModelSerializer):
             account.set_password(pw)
             account.save()
             return account
+
+class PasswordResetSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+    )
+    repeated_password = serializers.CharField(
+        write_only=True,
+        required=True,
+    )
+
+    def validate(self, data):
+        password = data.get('password')
+        repeated_password = data.get('repeated_password')
+
+        if password != repeated_password:
+            raise serializers.ValidationError({"repeated_password": "Die Passwörter stimmen nicht überein."})
+
+        return data

@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.urls import reverse
-from .serializers import RegistrationSerializer
+from .serializers import RegistrationSerializer, PasswordResetSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -93,3 +93,72 @@ def generate_profile(request, saved_account, username_profile):
         last_name=request.data['last_name'],
         email=saved_account.email,
     )
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        email_or_username = request.data.get('email_or_username')
+        user = validateUser(email_or_username)
+        profile = get_object_or_404(Profile, user=user.id)
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_link = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+        full_link = f"{config('ROOT-DOMAIN')}{reset_link}"
+        subject = "Passwort zurücksetzen - Videoflix"
+        html_message = generate_password_reset_email(profile.first_name, full_link)
+        plain_message = f"Hallo {profile.first_name}, du kannst dein Passwort über folgenden Link zurücksetzen: {full_link}" 
+        send_mail(subject, plain_message, config('EMAIL_USER'), [user.email], html_message=html_message)
+        return Response({"message": "Bitte überprüfe deine E-Mails, um dein Passwort zurückzusetzen."}, status=status.HTTP_200_OK)
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = get_object_or_404(User, pk=uid)
+            if default_token_generator.check_token(user, token):
+                frontend_url = f"{config('DOMAIN_REDIRECT')}/reset-password/?uid={uidb64}&token={token}"
+                print('frontend_url', frontend_url)
+                return HttpResponseRedirect(frontend_url)
+            return Response({"error": "Ungültiger oder abgelaufener Token."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Fehler beim Verarbeiten des Links: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = get_object_or_404(User, pk=uid)
+            if not default_token_generator.check_token(user, token):
+                return Response({"error": "Ungültiger oder abgelaufener Token."}, status=status.HTTP_400_BAD_REQUEST)
+            serializer = PasswordResetSerializer(data=request.data)
+            if serializer.is_valid():
+                new_password = serializer.validated_data['password']
+                user.set_password(new_password)
+                user.save()
+                return Response({"message": "Dein Passwort wurde erfolgreich zurückgesetzt."}, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": f"Fehler beim Zurücksetzen des Passworts: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+def generate_password_reset_email(first_name, reset_link):
+    html_message = f"""
+    <p>Hallo {first_name},</p>
+    <p>Klicke auf den folgenden Link, um dein Passwort zurückzusetzen:</p>
+    <p><a href="{reset_link}">Passwort zurücksetzen</a></p>
+    <p>Falls du das Zurücksetzen nicht angefordert hast, ignoriere diese E-Mail.</p>
+    """
+    return html_message
+
+def validateUser(email_or_username):
+    if '@' in email_or_username: 
+       user = get_object_or_404(User, email=email_or_username)
+    else:
+        if ' ' in email_or_username:
+            email_or_username = email_or_username.replace(' ', '_')
+        username = email_or_username.lower()
+        print('email_or_username', username)
+        user = get_object_or_404(User, username=username)
+    return user
