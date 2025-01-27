@@ -20,6 +20,7 @@ class ProfileViewSets(generics.ListCreateAPIView):
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     
+    
     def post(self, request):
         serializer = ProfileViewerSerializer(data=request.data)
         if serializer.is_valid():
