@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsOwnerOrAdmin
+from .permissions import IsOwnerOrAdmin, IsOwnerFromViewerOrAdmin
 from django.contrib.auth.models import User
 
 
@@ -50,9 +50,20 @@ class ProfileSinglViewSets(generics.ListCreateAPIView):
             raise PermissionDenied("POST-Anfragen sind für diesen Endpunkt nicht erlaubt.")
         if self.request.method in ['PATCH']:
             permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+        if self.request.method in ['GET', 'DELETE']:
+            permission_classes = [IsAuthenticated, IsOwnerFromViewerOrAdmin]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
+    
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+        try:
+            viewer = ProfileViewer.objects.get(pk=pk)
+            serialized_data = ProfileViewerSerializer(viewer).data
+            return Response(serialized_data, status=status.HTTP_200_OK)
+        except ProfileViewer.DoesNotExist:
+            return Response({"detail": "Profil nicht gefunden"}, status=status.HTTP_404_NOT_FOUND)
         
     def patch(self, request, *args, **kwargs):
         pk = request.data.get('user')
