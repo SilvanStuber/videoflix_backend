@@ -27,8 +27,10 @@ class ProfileViewSets(generics.ListCreateAPIView):
             instance = serializer.save()
             instance.viewer_id = instance.pk
             instance.save()
-            response_serializer = ProfileViewerSerializer(instance)
-            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            user_id = request.data.get('user')
+            queryset = ProfileViewer.objects.filter(user=user_id)
+            serialized_data = ProfileViewerSerializer(queryset, many=True).data
+            return Response(serialized_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
@@ -72,9 +74,9 @@ class ProfileSinglViewSets(generics.ListCreateAPIView):
             return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, *args, **kwargs):
-        pk = request.data.get('user')
-        user = User.objects.get(pk=pk)
         viewer_id = self.kwargs.get('pk')
+        viewer = ProfileViewer.objects.get(pk=viewer_id)
+        user = User.objects.get(pk=viewer.user)
         try:
             viewer = ProfileViewer.objects.get(pk=viewer_id)
             if not (request.user == user or request.user.is_staff):
