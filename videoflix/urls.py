@@ -12,7 +12,7 @@ urlpatterns = [
     path('api/login/', include('login_app.api.urls')),
     path('api/profile/', include('profile_user_app.api.urls')),
     path('api/viewer/', include('profile_viewer_app.api.urls')),
-
+    path('api/videos/', include('content_app.api.urls')),
 ] + staticfiles_urlpatterns()
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
