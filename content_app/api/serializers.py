@@ -4,7 +4,7 @@ from content_app.models import Video
 class VideoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
-        fields = ['id', 'title']  # Falls du ein Thumbnail hast, ergänze 'thumbnail'
+        fields = ['id', 'title']
 
 class VideoDetailSerializer(serializers.ModelSerializer):
     video_720p = serializers.SerializerMethodField()

@@ -37,27 +37,52 @@ class ProfileViewSets(generics.ListCreateAPIView):
                 raise PermissionDenied("Keine Berechtigung, dieses Profil zu bearbeiten.")
             serializer = ProfileSerializer(profile, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
+            new_username = request.data.get('username', '').strip().replace(' ', '_').lower()
+            email = request.data.get('email')
+            if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
+                return Response(
+                    {"error": "Benutzername bereits vergeben."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if User.objects.filter(email=email).exclude(pk=user.pk).exists():
+                return Response(
+                    {"error": "Email bereits vergeben."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             serializer.save()
-            switch_username(user, profile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            switch_username(user, profile, email)
+            return Response({
+                'user': user.id,
+                'username': profile.username,
+                'first_name': profile.first_name,
+                'last_name': profile.last_name,
+                'email': profile.email,
+                'token': request.auth.key
+            }, status=status.HTTP_200_OK)
         except NotFound:
-            return Response({
-                "detail": "Profil nicht gefunden"
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Profil nicht gefunden"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
         except PermissionDenied:
-            return Response({
-                "detail": "Keine Berechtigung, dieses Profil zu bearbeiten."
-            }, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Keine Berechtigung, dieses Profil zu bearbeiten."}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
         except ValidationError as e:
-            return Response({
-                "errors": e.detail
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"errors": e.detail}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
         
 
-def switch_username(user, profile):
+def switch_username(user, profile, email):
     new_username = profile.username
     if ' ' in new_username:
         new_username = new_username.replace(' ', '_')
     username = new_username.lower()
     user.username = username
+    user.email = email
     user.save()
