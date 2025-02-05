@@ -20,7 +20,14 @@ class ProfileViewSets(generics.ListCreateAPIView):
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     
-    
+    def get_queryset(self):
+        try:
+            user = self.request.query_params.get('user') 
+            if user:
+                return ProfileViewer.objects.filter(user=user)
+        except user.DoesNotExist:
+            return Response({"detail": "Profile nicht gefunden"}, status=status.HTTP_404_NOT_FOUND)
+   
     def post(self, request):
         serializer = ProfileViewerSerializer(data=request.data)
         if serializer.is_valid():
@@ -32,15 +39,7 @@ class ProfileViewSets(generics.ListCreateAPIView):
             serialized_data = ProfileViewerSerializer(queryset, many=True).data
             return Response(serialized_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get_queryset(self):
-        queryset = ProfileViewer.objects.all()
-        user_id = self.request.query_params.get('user_id')
-        if user_id:
-            queryset = queryset.filter(user=user_id)
-        return queryset
-
-    
+ 
 class ProfileSinglViewSets(generics.ListCreateAPIView):  
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileViewerSerializer

@@ -119,7 +119,6 @@ class PasswordResetConfirmView(APIView):
             user = get_object_or_404(User, pk=uid)
             if default_token_generator.check_token(user, token):
                 frontend_url = f"{config('DOMAIN_REDIRECT')}/reset-password/?uid={uidb64}&token={token}"
-                print('frontend_url', frontend_url)
                 return HttpResponseRedirect(frontend_url)
             return Response({"error": "Ungültiger oder abgelaufener Token."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
