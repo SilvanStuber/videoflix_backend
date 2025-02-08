@@ -50,7 +50,7 @@ class PasswordResetSerializer(serializers.Serializer):
         repeated_password = data.get('repeated_password')
 
         if password != repeated_password:
-            raise serializers.ValidationError({"repeated_password": "Die Passwörter stimmen nicht überein."})
+            raise serializers.ValidationError({"detail": "Die Passwörter stimmen nicht überein."})
 
         return data
 
@@ -62,9 +62,9 @@ class OldPasswordResetSerializer(serializers.Serializer):
     def validate(self, data):
         user = self.context['request'].user
         if not user.check_password(data.get('old_password')):
-            raise serializers.ValidationError({"old_password": "Das alte Passwort ist falsch."})
+            raise serializers.ValidationError({"detail": "Das alte Passwort ist falsch."})
         if data.get('password') != data.get('repeated_password'):
-            raise serializers.ValidationError({"repeated_password": "Die Passwörter stimmen nicht überein."})
+            raise serializers.ValidationError({"detail": "Die Passwörter stimmen nicht überein."})
         return data
 
     def update_password(self):
