@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 
 class RegistrationSerializer(serializers.ModelSerializer):
     repeated_password = serializers.CharField(write_only=True)
@@ -52,3 +53,23 @@ class PasswordResetSerializer(serializers.Serializer):
             raise serializers.ValidationError({"repeated_password": "Die Passwörter stimmen nicht überein."})
 
         return data
+
+class OldPasswordResetSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=True)
+    repeated_password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, data):
+        user = self.context['request'].user
+        if not user.check_password(data.get('old_password')):
+            raise serializers.ValidationError({"old_password": "Das alte Passwort ist falsch."})
+        if data.get('password') != data.get('repeated_password'):
+            raise serializers.ValidationError({"repeated_password": "Die Passwörter stimmen nicht überein."})
+        return data
+
+    def update_password(self):
+        """Setzt das neue Passwort für den Benutzer."""
+        user = self.context['request'].user
+        user.set_password(self.validated_data['password'])
+        user.save()
+

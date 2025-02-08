@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.urls import reverse
-from .serializers import RegistrationSerializer, PasswordResetSerializer
+from .serializers import RegistrationSerializer, PasswordResetSerializer, OldPasswordResetSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -17,7 +17,9 @@ from django.http import HttpResponseRedirect
 from decouple import config
 from rest_framework.authtoken.models import Token
 from profile_user_app.models import Profile
-
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwnerOrAdmin
+from rest_framework.exceptions import PermissionDenied
 
 class RegistrationView(APIView):
     permission_classes = [AllowAny] 
@@ -161,3 +163,21 @@ def validateUser(email_or_username):
         print('email_or_username', username)
         user = get_object_or_404(User, username=username)
     return user
+
+
+class OldPasswordResetView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self): 
+        if self.request.method == 'POST':
+            permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+        else:
+            raise PermissionDenied("Only POST requests are allowed.")
+        return [permission() for permission in permission_classes]
+
+    def post(self, request):
+        serializer = OldPasswordResetSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.update_password()
+            return Response({"message": "Passwort erfolgreich geändert."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
