@@ -4,7 +4,7 @@ from content_app.models import Video
 class VideoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
-        fields = ['id', 'title']
+        fields = ['id', 'title', 'titel_picture_file', 'description',]
 
 class VideoDetailSerializer(serializers.ModelSerializer):
     video_720p = serializers.SerializerMethodField()
@@ -13,7 +13,7 @@ class VideoDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Video
-        fields = ['id', 'title', 'description', 'created_at', 'video_file', 'video_720p', 'video_480p',]
+        fields = ['id', 'title', 'description', 'video_file', 'video_720p', 'video_480p',]
 
     def get_video_720p(self, obj):
         if obj.video_file:
