@@ -44,10 +44,18 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory and add the following variables:
 
 ```plaintext
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASSWORD=your_email_password
-DOMAIN_REDIRECT=https://your-forwarding-domain/
-ROOT-DOMAIN=https://your-root-domain/
+# Email Backend Settings
+EMAIL_BACKEND = django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST = smtp.example.com  # Replace with your email provider
+EMAIL_HOST_USER = your-email@example.com  # Replace with your email address
+EMAIL_HOST_PASSWORD = your-email-password  # Replace with your email password or app password
+EMAIL_PORT = 587  # Default SMTP port (may vary)
+EMAIL_USE_TLS = True  # Set to True for TLS encryption
+EMAIL_USE_SSL = False  # Set to True if your provider requires SSL
+
+#Domain
+DOMAIN_REDIRECT = http://localhost:4200  # Replace with your frontend domain
+ROOT_DOMAIN = http://127.0.0.1:8000  # Replace with your backend domain
 ```
 
 Ensure the `.env` file is included in `.gitignore` to prevent exposing credentials.
