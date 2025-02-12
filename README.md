@@ -44,18 +44,23 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory and add the following variables:
 
 ```plaintext
-# Email Backend Settings
-EMAIL_BACKEND = django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST = smtp.example.com  # Replace with your email provider
-EMAIL_HOST_USER = your-email@example.com  # Replace with your email address
-EMAIL_HOST_PASSWORD = your-email-password  # Replace with your email password or app password
-EMAIL_PORT = 587  # Default SMTP port (may vary)
-EMAIL_USE_TLS = True  # Set to True for TLS encryption
-EMAIL_USE_SSL = False  # Set to True if your provider requires SSL
 
-#Domain
-DOMAIN_REDIRECT = http://localhost:4200  # Replace with your frontend domain
-ROOT_DOMAIN = http://127.0.0.1:8000  # Replace with your backend domain
+# Redis Configuration
+REDIS_PASSWORD=<your_redis_password>  # The password for Redis authentication
+REDIS_HOST=127.0.0.1  # The hostname or IP address where Redis is running
+REDIS_PORT=6379  # The port on which Redis is listening (default: 6379)
+REDIS_DB=1  # The Redis database index (can be changed if needed)
+
+# Email Backend Settings
+EMAIL_HOST=smtp.example.com  # Replace with your email provider
+EMAIL_HOST_USER=your-email@example.com  # Replace with your email
+EMAIL_HOST_PASSWORD=your-email-password  # Replace with your email password
+DEFAULT_FROM_EMAIL=your-email@example.com
+
+# Domain
+DOMAIN_REDIRECT=http://localhost:4200  # Replace with your frontend domain
+ROOT_DOMAIN=http://127.0.0.1:8000  # Replace with your backend domain
+
 ```
 
 Ensure the `.env` file is included in `.gitignore` to prevent exposing credentials.

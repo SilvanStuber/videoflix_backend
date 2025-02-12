@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.urls import reverse
@@ -14,12 +13,13 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
 from django.http import HttpResponseRedirect
-from decouple import config
 from rest_framework.authtoken.models import Token
 from profile_user_app.models import Profile
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwnerOrAdmin
 from rest_framework.exceptions import PermissionDenied
+import os
+from dotenv import load_dotenv
 
 class RegistrationView(APIView):
     permission_classes = [AllowAny] 
@@ -47,7 +47,7 @@ class ActivateAccountView(APIView):
             if default_token_generator.check_token(user, token):
                 user.is_active = True
                 user.save()
-                return HttpResponseRedirect(config('DOMAIN_REDIRECT'))
+                return HttpResponseRedirect(os.getenv('DOMAIN_REDIRECT'))
             return Response({"error": "Ungültiger oder abgelaufener Token."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": "Aktivierungsfehler."}, status=status.HTTP_400_BAD_REQUEST)
@@ -72,11 +72,11 @@ def send_confirmation_email(user, first_name, last_name):
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     activation_link = reverse('activate_account', kwargs={'uidb64': uid, 'token': token})
-    full_link = f"{config('ROOT-DOMAIN')}{activation_link}"
+    full_link = f"{os.getenv('ROOT-DOMAIN')}{activation_link}"
     subject = "Bestätige deinen Videoflix-Account"
     html_message = generate_email(first_name, last_name, full_link)
     plain_message = f"Hallo {user.username}, bitte aktiviere deinen Account hier: {full_link}"
-    send_mail(subject, plain_message, config('EMAIL_USER'), [user.email], html_message=html_message)
+    send_mail(subject, plain_message, os.getenv('EMAIL_HOST_USER'), [user.email], html_message=html_message)
 
 def generate_email(first_name, last_name, full_link):
     html_message = f"""
@@ -105,11 +105,11 @@ class PasswordResetRequestView(APIView):
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         reset_link = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
-        full_link = f"{config('ROOT-DOMAIN')}{reset_link}"
+        full_link = f"{os.getenv('ROOT-DOMAIN')}{reset_link}"
         subject = "Passwort zurücksetzen - Videoflix"
         html_message = generate_password_reset_email(profile.first_name, full_link)
         plain_message = f"Hallo {profile.first_name}, du kannst dein Passwort über folgenden Link zurücksetzen: {full_link}" 
-        send_mail(subject, plain_message, config('EMAIL_USER'), [user.email], html_message=html_message)
+        send_mail(subject, plain_message, os.getenv('EMAIL_HOST_USER'), [user.email], html_message=html_message)
         return Response({"message": "Bitte überprüfe deine E-Mails, um dein Passwort zurückzusetzen."}, status=status.HTTP_200_OK)
 
 class PasswordResetConfirmView(APIView):
@@ -120,7 +120,7 @@ class PasswordResetConfirmView(APIView):
             uid = urlsafe_base64_decode(uidb64).decode()
             user = get_object_or_404(User, pk=uid)
             if default_token_generator.check_token(user, token):
-                frontend_url = f"{config('DOMAIN_REDIRECT')}/reset-password/?uid={uidb64}&token={token}"
+                frontend_url = f"{os.getenv('DOMAIN_REDIRECT')}/reset-password/?uid={uidb64}&token={token}"
                 return HttpResponseRedirect(frontend_url)
             return Response({"error": "Ungültiger oder abgelaufener Token."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
