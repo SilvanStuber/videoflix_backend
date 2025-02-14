@@ -10,9 +10,19 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 
 class IsOwnerFromViewerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        viewer_id = request.pk
-        viewer = ProfileViewer.objects.get(pk=viewer_id)
-        if request.user.pk == obj.viewer.user or request.user.is_staff:
-            return True     
-        return False
+        viewer_id = view.kwargs.get("pk")  # `pk` aus der URL holen
+
+        if viewer_id is None:
+            return False  # Falls kein `pk` vorhanden ist, verweigern
+
+        try:
+            viewer = ProfileViewer.objects.get(pk=viewer_id)
+        except ProfileViewer.DoesNotExist:
+            return False  # Falls kein Viewer existiert, verweigern
+
+        # 🛠 FIX: `obj.user` statt `obj.viewer.user`
+        return request.user.pk == viewer.user or request.user.is_staff
+
+
+
 
