@@ -8,11 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 
 class VideoDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-
     queryset = Video.objects.all()
     serializer_class = VideoDetailSerializer
     lookup_field = 'id'  
-
 
 class VideoListView(APIView):
     permission_classes = [IsAuthenticated]

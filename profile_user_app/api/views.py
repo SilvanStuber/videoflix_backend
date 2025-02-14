@@ -8,7 +8,6 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .permissions import IsOwnerOrAdmin
 
-
 class ProfileViewSets(generics.ListCreateAPIView):  
     permission_classes = [IsAuthenticated]
 
@@ -32,51 +31,39 @@ class ProfileViewSets(generics.ListCreateAPIView):
         pk = self.kwargs.get('pk')
         user = User.objects.get(pk=pk)
         try:
-            profile = Profile.objects.get(user=pk)
-            if not (request.user == user or request.user.is_staff):
-                raise PermissionDenied("Keine Berechtigung, dieses Profil zu bearbeiten.")
-            serializer = ProfileSerializer(profile, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            new_username = request.data.get('username', '').strip().replace(' ', '_').lower()
-            email = request.data.get('email')
-            if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
-                return Response(
-                    {"error": "Benutzername bereits vergeben."}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            if User.objects.filter(email=email).exclude(pk=user.pk).exists():
-                return Response(
-                    {"error": "Email bereits vergeben."}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            serializer.save()
-            switch_username(user, profile, email)
-            return Response({
-                'user': user.id,
-                'username': profile.username,
-                'first_name': profile.first_name,
-                'last_name': profile.last_name,
-                'email': profile.email,
-                'token': request.auth.key
-            }, status=status.HTTP_200_OK)
+            validateUserData(request, pk, user)
         except NotFound:
-            return Response(
-                {"detail": "Profil nicht gefunden"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"detail": "Profil nicht gefunden"}, status=status.HTTP_404_NOT_FOUND)
         except PermissionDenied:
-            return Response(
-                {"detail": "Keine Berechtigung, dieses Profil zu bearbeiten."}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({"detail": "Keine Berechtigung, dieses Profil zu bearbeiten."}, status=status.HTTP_403_FORBIDDEN)
         except ValidationError as e:
-            return Response(
-                {"errors": e.detail}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-
+            return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
         
+def validateUserData(request, pk, user):
+    profile = Profile.objects.get(user=pk)
+    if not (request.user == user or request.user.is_staff):
+        raise PermissionDenied("Keine Berechtigung, dieses Profil zu bearbeiten.")
+    serializer = ProfileSerializer(profile, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    new_username = request.data.get('username', '').strip().replace(' ', '_').lower()
+    email = request.data.get('email')
+    if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
+        return Response({"error": "Benutzername bereits vergeben."}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(email=email).exclude(pk=user.pk).exists():
+        return Response({"error": "Email bereits vergeben."}, status=status.HTTP_400_BAD_REQUEST)
+    saveUserData(user, profile, email, serializer, request)
+
+def saveUserData(user, profile, email, serializer, request):
+    serializer.save()
+    switch_username(user, profile, email)
+    return Response({
+        'user': user.id,
+        'username': profile.username,
+        'first_name': profile.first_name,
+        'last_name': profile.last_name,
+        'email': profile.email,
+        'token': request.auth.key
+        }, status=status.HTTP_200_OK)
 
 def switch_username(user, profile, email):
     new_username = profile.username

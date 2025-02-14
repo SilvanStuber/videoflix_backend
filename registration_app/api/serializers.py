@@ -26,11 +26,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         if User.objects.filter(username=self.validated_data['username']).exists():
             raise serializers.ValidationError({"detail": ["Dieser Benutzername ist bereits vergeben."],})
         else:
-            account = User(
-                email=self.validated_data['email'],
-                username=self.validated_data['username'],
-                is_active=False 
-            )
+            account = User(email=self.validated_data['email'], username=self.validated_data['username'], is_active=False)
             account.set_password(pw)
             account.save()
             return account
@@ -48,7 +44,6 @@ class PasswordResetSerializer(serializers.Serializer):
     def validate(self, data):
         password = data.get('password')
         repeated_password = data.get('repeated_password')
-
         if password != repeated_password:
             raise serializers.ValidationError({"detail": "Die Passwörter stimmen nicht überein."})
 

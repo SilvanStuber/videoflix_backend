@@ -8,7 +8,6 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
-
 class RegistrationViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -39,7 +38,6 @@ class RegistrationViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("detail", response.data)
 
-
 class ActivateAccountViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -51,7 +49,7 @@ class ActivateAccountViewTest(TestCase):
     def test_activate_account_success(self):
         response = self.client.get(self.url)
         self.user.refresh_from_db()
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)  # Redirect nach DOMAIN_REDIRECT
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertTrue(self.user.is_active)
 
     def test_activate_account_invalid_token(self):

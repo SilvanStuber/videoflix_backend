@@ -13,21 +13,29 @@ class CustomLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError({"detail": "Benutzername oder E-Mail und Passwort sind erforderlich."})  
         user = None
         if '@' in username_or_email:    
-            try:
-                user_instance = User.objects.get(email=username_or_email)
-                user = authenticate(username=user_instance.username, password=password)
-            except User.DoesNotExist:
-                raise serializers.ValidationError({"detail": "Ungültige Logindaten oder der Benutzer ist deaktiviert. Bitte überprüfe deine E-Mails und aktiviere dein Konto."})
+           user = loginWithEmail(username_or_email, password)
         else:
-            try:
-                username = generate_username_login(username_or_email)
-                user = authenticate(username=username, password=password)
-            except User.DoesNotExist:
-                raise serializers.ValidationError({"detail": "Ungültige Logindaten oder der Benutzer ist deaktiviert. Bitte überprüfe deine E-Mails und aktiviere dein Konto."})
+           user = loginWithUsername(username_or_email, password)
         if user is None:
             raise serializers.ValidationError({"detail": "Ungültige Logindaten oder der Benutzer ist deaktiviert. Bitte überprüfe deine E-Mails und aktiviere dein Konto."})
         data['user'] = user
         return data
+    
+def loginWithUsername(username_or_email, password):
+    try:
+        username = generate_username_login(username_or_email)
+        user = authenticate(username=username, password=password)
+    except User.DoesNotExist:
+            raise serializers.ValidationError({"detail": "Ungültige Logindaten oder der Benutzer ist deaktiviert. Bitte überprüfe deine E-Mails und aktiviere dein Konto."})    
+    return user
+
+def loginWithEmail(username_or_email, password):
+        try:
+            user_instance = User.objects.get(email=username_or_email)
+            user = authenticate(username=user_instance.username, password=password)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({"detail": "Ungültige Logindaten oder der Benutzer ist deaktiviert. Bitte überprüfe deine E-Mails und aktiviere dein Konto."})
+        return user
 
 def generate_username_login(username):
     if ' ' in username:

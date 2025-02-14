@@ -138,9 +138,7 @@ class PasswordResetConfirmView(APIView):
                 user.set_password(new_password)
                 user.save()
                 return Response({"message": "Dein Passwort wurde erfolgreich zurückgesetzt."}, status=status.HTTP_200_OK)
-
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         except Exception as e:
             return Response({"error": f"Fehler beim Zurücksetzen des Passworts: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 

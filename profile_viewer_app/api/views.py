@@ -8,7 +8,6 @@ from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwnerOrAdmin, IsOwnerFromViewerOrAdmin
 from django.contrib.auth.models import User
 
-
 class ProfileViewSets(generics.ListCreateAPIView):  
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileViewerSerializer

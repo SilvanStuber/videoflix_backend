@@ -10,7 +10,6 @@ class CostomLoginView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-
         serializer = CustomLoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
