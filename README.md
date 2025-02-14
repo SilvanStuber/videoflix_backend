@@ -135,3 +135,48 @@ pip freeze > requirements.txt
 - Ensure the virtual environment is activated before running the project.
 - Never commit sensitive data such as passwords or API keys to the repository.
 - Always test API endpoints using tools like Postman or Django's built-in API browser.
+
+# 🛠️ VideoFlix Backend - Test Guide
+
+This guide explains the required test files and how to run tests in the Django environment.
+
+---
+
+## 📂 Required Test Files
+
+To successfully run the tests, the following test files must be present in the **`media/` directory**:
+
+### 🖼️ Test Images
+
+Save the following example images in the **`media/img/`** directory:
+
+- `test.png`
+- `test.jpg`
+
+If you do not have suitable images, you can use dummy images with a size of **500x500 px**.
+
+### 🎥 Test Videos
+
+Save the following example videos in the **`media/videos/`** directory:
+
+- `test.mp4`
+- `test1.mp4`
+- `test2.mp4`
+
+If you do not have real videos, you can create empty files with the correct extension:
+
+```sh
+touch media/videos/test.mp4
+touch media/videos/test1.mp4
+touch media/videos/test2.mp4
+```
+
+---
+
+## ▶️ Run Tests
+
+To run the tests in the Django environment, execute the following command:
+
+```sh
+python manage.py test
+```
