@@ -6,7 +6,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('videoflix_backend/admin/', admin.site.urls),
     path('api/authentication/', include('registration_app.api.urls')),
     path('api/login/', include('login_app.api.urls')),
     path('api/profile/', include('profile_user_app.api.urls')),
