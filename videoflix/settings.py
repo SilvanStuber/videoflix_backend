@@ -109,7 +109,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://videoflix.silvanstuber.ch"
 ]
 
-ROOT_URLCONF = 'videoflix.urls'
+ROOT_URLCONF = 'videoflix_backend.urls'
 
 TEMPLATES = [
     {
