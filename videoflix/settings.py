@@ -14,8 +14,13 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 load_dotenv()
 
 # Quick-start development settings - unsuitable for production
@@ -84,6 +89,7 @@ CACHES = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",
+    "https://gc.silvanstuber.ch",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -158,6 +164,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
