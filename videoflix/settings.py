@@ -111,6 +111,8 @@ CSRF_TRUSTED_ORIGINS = [
 
 ROOT_URLCONF = 'videoflix.urls'
 
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
