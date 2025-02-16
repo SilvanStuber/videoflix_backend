@@ -32,7 +32,8 @@ SECRET_KEY = 'django-insecure-110d4&g0fwb&od$hp*po5*_#4=l3_s&9^0=1pb9ox+y0(dhx73
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1",
+    "localhost", '34.65.108.156','gc.silvanstuber.ch']
 
 
 # Application definition
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'registration_app',
@@ -55,8 +57,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',   
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     #'django.middleware.csrf.CsrfViewMiddleware',
@@ -111,9 +113,6 @@ TEMPLATES = [
         },
     },
 ]
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
 
 WSGI_APPLICATION = 'videoflix.wsgi.application'
 
