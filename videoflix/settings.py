@@ -75,6 +75,8 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
+FORCE_SCRIPT_NAME = "/videoflix_backend"
+
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
 REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = os.getenv("REDIS_PORT", "6379")
