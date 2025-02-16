@@ -19,6 +19,8 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 load_dotenv()
 
 # Quick-start development settings - unsuitable for production
@@ -72,6 +74,7 @@ MIDDLEWARE = [
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
 
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
 REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
