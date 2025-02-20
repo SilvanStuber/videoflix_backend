@@ -72,7 +72,7 @@ def send_confirmation_email(user, first_name, last_name):
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     activation_link = reverse('activate_account', kwargs={'uidb64': uid, 'token': token})
-    full_link = f"{os.getenv('ROOT-DOMAIN')}{activation_link}"
+    full_link = f"https://gc.silvanstuber.ch/videoflix_backend/{activation_link}"
     subject = "Bestätige deinen Videoflix-Account"
     html_message = generate_email(first_name, last_name, full_link)
     plain_message = f"Hallo {user.username}, bitte aktiviere deinen Account hier: {full_link}"
